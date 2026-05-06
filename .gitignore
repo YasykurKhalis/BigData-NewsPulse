@@ -1,0 +1,28 @@
+# Data folder - jangan di-push
+dashboard/data/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+.env
+
+# Jupyter checkpoint
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# API Keys - jangan di-push!
+config.py
+secrets.py
+*.key
+
+# Log files
+*.log
