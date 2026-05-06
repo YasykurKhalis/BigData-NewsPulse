@@ -8,9 +8,9 @@
 
 | Nama | NRP | Tugas |
 |---|---|---|
-| Yasykur Khalis Jati Maulana Yuwono | 5027241112 | Setup Docker (Hadoop + Kafka), Infrastructure |
-| Ryan Adya Purwanto | 5027231046 | `producer_api.py` + `spark/analysis.ipynb` |
-| Hanif Mawla Faizi | 5027241064 | `producer_rss.py` + `consumer_to_hdfs.py` + `dashboard/app.py` |
+| Ryan Adya Purwanto | 5027231046 | Setup Docker (Hadoop + Kafka), Infrastructure + `spark/analysis.ipynb` |
+| Yasykur Khalis Jati Maulana Yuwono | 5027241112 | `producer_api.py` + `producer_rss.py` |
+| Hanif Mawla Faizi | 5027241064 | `consumer_to_hdfs.py` + `dashboard/app.py` |
 
 ---
 
