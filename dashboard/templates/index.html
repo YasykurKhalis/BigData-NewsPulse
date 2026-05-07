@@ -4,426 +4,624 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NewsPulse — Monitor Tren Berita Nasional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg:        #08070f;
+      --bg2:       #100e1a;
+      --bg3:       #16132a;
+      --border:    #2a2050;
+      --accent1:   #8b5cf6;
+      --accent2:   #a78bfa;
+      --accent3:   #c4b5fd;
+      --accent-glow: rgba(139,92,246,0.25);
+      --text:      #e8e3ff;
+      --text2:     #9d8fc0;
+      --text3:     #5a4f7a;
+      --green:     #34d399;
+      --gold:      #fbbf24;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(139,92,246,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 90%, rgba(109,40,217,0.08) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
     }
 
     /* ── Header ── */
     header {
-      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      position: relative; z-index: 10;
       padding: 20px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,7,15,0.85);
+      backdrop-filter: blur(12px);
     }
-    header h1 { font-size: 1.6rem; }
-    header h1 span { color: #93c5fd; }
-    #last-update { font-size: 0.85rem; color: #93c5fd; }
-    #status-dot {
-      width: 10px; height: 10px;
-      background: #22c55e;
-      border-radius: 50%;
+
+    .logo { display: flex; align-items: center; gap: 14px; }
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, var(--accent1), #6d28d9);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .logo-text h1 { font-family: 'Space Mono', monospace; font-size: 1.3rem; }
+    .logo-text h1 span { color: var(--accent2); }
+    .logo-text p { font-size: 0.7rem; color: var(--text3); margin-top: 2px; letter-spacing: 0.8px; text-transform: uppercase; }
+
+    .header-right { display: flex; align-items: center; gap: 18px; }
+    .live-badge {
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(52,211,153,0.08);
+      border: 1px solid rgba(52,211,153,0.25);
+      border-radius: 999px; padding: 5px 13px;
+      font-size: 0.75rem; color: var(--green);
+      font-weight: 700; letter-spacing: 1px;
+    }
+    .live-dot {
+      width: 7px; height: 7px;
+      background: var(--green); border-radius: 50%;
+      animation: pulse-g 2s infinite;
+    }
+    @keyframes pulse-g {
+      0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(52,211,153,0.5); }
+      50% { opacity:.7; box-shadow:0 0 0 5px rgba(52,211,153,0); }
+    }
+    #last-update { font-size: 0.75rem; color: var(--text3); font-family: 'Space Mono', monospace; }
+
+    /* ── News Ticker ── */
+    .ticker-wrap {
+      position: relative; z-index: 9;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      height: 36px; overflow: hidden;
+    }
+    .ticker-label {
+      flex-shrink: 0;
+      background: linear-gradient(90deg, var(--accent1), #6d28d9);
+      padding: 0 14px;
+      height: 100%;
+      display: flex; align-items: center;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      white-space: nowrap; z-index: 1;
+    }
+    .ticker-label::after {
+      content: '';
+      position: absolute;
+      left: 100px; top: 0; bottom: 0; width: 30px;
+      background: linear-gradient(90deg, #6d28d9, transparent);
+    }
+    .ticker-track {
+      flex: 1; overflow: hidden;
+      position: relative; height: 100%;
+    }
+    .ticker-content {
+      display: flex; align-items: center;
+      height: 100%;
+      white-space: nowrap;
+      animation: ticker-scroll 40s linear infinite;
+    }
+    .ticker-content:hover { animation-play-state: paused; }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 28px;
+      font-size: 0.78rem; color: var(--text2);
+      border-right: 1px solid var(--border);
+      height: 100%;
+      cursor: pointer;
+      transition: color .2s;
+    }
+    .ticker-item:hover { color: var(--accent2); }
+    .ticker-item-src {
+      font-size: 0.65rem; font-weight: 700;
+      color: var(--accent1);
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase;
+    }
+    .ticker-sep {
       display: inline-block;
-      margin-right: 6px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+      width: 4px; height: 4px;
+      background: var(--accent1);
+      border-radius: 50%;
+      margin: 0 8px;
+      opacity: 0.5;
     }
 
     /* ── Layout ── */
     main {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 24px 20px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      position: relative; z-index: 1;
+      max-width: 1440px; margin: 0 auto;
+      padding: 26px 22px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
     }
     .full-width { grid-column: 1 / -1; }
 
+    /* ── Stats ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+    .stat-box {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px 22px;
+      position: relative; overflow: hidden;
+      transition: border-color .3s, transform .2s;
+    }
+    .stat-box:hover { border-color: var(--accent1); transform: translateY(-2px); }
+    .stat-box::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent1), transparent);
+    }
+    .stat-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 10px; }
+    .stat-number { font-family: 'Space Mono', monospace; font-size: 2.2rem; font-weight: 700; color: var(--accent2); line-height: 1; }
+    .stat-icon { position: absolute; top: 16px; right: 16px; font-size: 1.5rem; opacity: 0.12; }
+
     /* ── Card ── */
     .card {
-      background: #1e293b;
-      border-radius: 12px;
-      padding: 20px;
-      border: 1px solid #334155;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 22px;
+      transition: border-color .3s;
+      animation: fadeUp .4s ease both;
     }
-    .card h2 {
-      font-size: 1rem;
-      color: #93c5fd;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card h2::before {
-      content: '';
-      width: 4px; height: 18px;
-      background: #2563eb;
-      border-radius: 2px;
+    .card:hover { border-color: #3d3060; }
+    .card:nth-child(2) { animation-delay:.05s; }
+    .card:nth-child(3) { animation-delay:.1s; }
+    .card:nth-child(4) { animation-delay:.15s; }
+    .card:nth-child(5) { animation-delay:.2s; }
+    .card:nth-child(6) { animation-delay:.25s; }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(14px); }
+      to   { opacity:1; transform:translateY(0); }
     }
 
-    /* ── Stat boxes ── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px; padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
     }
-    .stat-box {
-      background: #0f172a;
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-      border: 1px solid #1e40af;
+    .card-title { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; font-weight: 600; }
+    .card-icon {
+      width: 30px; height: 30px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(139,92,246,.3);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
     }
-    .stat-box .number {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #60a5fa;
+    .card-meta { display: flex; align-items: center; gap: 8px; }
+    .card-tag {
+      font-size: 0.66rem;
+      background: rgba(139,92,246,.1); border: 1px solid rgba(139,92,246,.25);
+      color: var(--accent3); padding: 3px 9px;
+      border-radius: 999px; font-weight: 600;
+      letter-spacing: .5px; text-transform: uppercase;
     }
-    .stat-box .label {
-      font-size: 0.78rem;
-      color: #94a3b8;
-      margin-top: 4px;
+    /* Spark timestamp badge */
+    .spark-ts {
+      font-size: 0.62rem;
+      color: var(--text3);
+      font-family: 'Space Mono', monospace;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 3px 8px; border-radius: 6px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .spark-ts-dot {
+      width: 5px; height: 5px;
+      background: var(--accent1); border-radius: 50%;
     }
 
-    /* ── Table ── */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-    }
-    th {
-      text-align: left;
-      padding: 10px 12px;
-      background: #0f172a;
-      color: #60a5fa;
-      font-weight: 600;
-      border-bottom: 2px solid #1e40af;
-    }
-    td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #1e293b;
-      vertical-align: top;
-    }
-    tr:hover td { background: #0f172a; }
-    .rank { color: #f59e0b; font-weight: 700; }
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .badge-kompas  { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed; }
-    .badge-tempo   { background: #dc262622; color: #f87171; border: 1px solid #dc2626; }
-    .badge-gnews   { background: #05966922; color: #34d399; border: 1px solid #059669; }
-    .badge-newsapi { background: #d9770622; color: #fb923c; border: 1px solid #d97706; }
-    .badge-other   { background: #33415522; color: #94a3b8; border: 1px solid #334155; }
+    .loading { text-align: center; padding: 48px; color: var(--text3); font-size: .85rem; }
 
-    /* ── Bar chart (CSS only) ── */
-    .bar-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-      gap: 10px;
-    }
-    .bar-label { width: 130px; font-size: 0.85rem; color: #cbd5e1; flex-shrink: 0; }
-    .bar-track {
-      flex: 1;
-      background: #0f172a;
-      border-radius: 4px;
-      height: 22px;
-      overflow: hidden;
-    }
+    /* ── Word bars ── */
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .bar-rank { font-family: 'Space Mono', monospace; font-size: .66rem; color: var(--text3); width: 18px; text-align: right; flex-shrink: 0; }
+    .bar-label { width: 105px; font-size: .82rem; color: var(--text2); flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { flex: 1; background: var(--bg3); border-radius: 4px; height: 20px; overflow: hidden; }
     .bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      background: linear-gradient(90deg, #2563eb, #60a5fa);
-      display: flex;
-      align-items: center;
-      padding-left: 8px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      transition: width 0.5s ease;
-      min-width: 30px;
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      display: flex; align-items: center; justify-content: flex-end;
+      padding-right: 8px; font-size: .7rem; font-weight: 700;
+      font-family: 'Space Mono', monospace; color: white; min-width: 26px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 0 10px rgba(139,92,246,.25);
     }
+    .bar-row.top1 .bar-fill { background: linear-gradient(90deg, #7c3aed, #c4b5fd); }
+    .bar-row.top2 .bar-fill { background: linear-gradient(90deg, #6d28d9, #a78bfa); }
+    .bar-row.top3 .bar-fill { background: linear-gradient(90deg, #5b21b6, #8b5cf6); }
 
-    /* ── News feed ── */
+    /* ── Pie chart ── */
+    .pie-wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+    .pie-svg { flex-shrink: 0; }
+    .pie-legend { flex: 1; min-width: 160px; }
+    .pie-legend-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 0; border-bottom: 1px solid var(--border);
+      font-size: .8rem;
+    }
+    .pie-legend-item:last-child { border-bottom: none; }
+    .pie-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .pie-legend-name { flex: 1; color: var(--text2); }
+    .pie-legend-pct { font-family: 'Space Mono', monospace; font-size: .72rem; color: var(--accent2); }
+
+    /* ── Hours chart ── */
+    .hours-outer { overflow-x: auto; }
+    .hours-chart {
+      display: flex; align-items: flex-end; gap: 6px;
+      padding: 32px 4px 0;
+      min-width: 420px; height: 140px;
+    }
+    .hour-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .hour-count { font-size: .62rem; color: var(--text3); font-family: 'Space Mono', monospace; white-space: nowrap; }
+    .hour-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height .4s ease; min-height: 6px; }
+    .hour-bar.peak { background: linear-gradient(180deg, var(--accent3), var(--accent1)); box-shadow: 0 0 14px var(--accent-glow); }
+    .hour-bar.normal { background: var(--bg3); border: 1px solid var(--border); }
+    .hour-label { font-size: .56rem; color: var(--text3); font-family: 'Space Mono', monospace; }
+    .hours-insight {
+      margin-top: 14px; padding: 10px 14px;
+      background: var(--bg3); border-radius: 8px;
+      border-left: 3px solid var(--accent1);
+      font-size: .82rem; color: var(--text2);
+    }
+    .hours-insight strong { color: var(--accent2); }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 600; }
+    .badge-tempo   { background:rgba(248,113,113,.1); color:#f87171; border:1px solid rgba(248,113,113,.3); }
+    .badge-kompas  { background:rgba(167,139,250,.1); color:#a78bfa; border:1px solid rgba(167,139,250,.3); }
+    .badge-gnews   { background:rgba(52,211,153,.1);  color:#34d399; border:1px solid rgba(52,211,153,.3); }
+    .badge-newsapi { background:rgba(251,191,36,.1);  color:#fbbf24; border:1px solid rgba(251,191,36,.3); }
+    .badge-other   { background:rgba(148,163,184,.1); color:#94a3b8; border:1px solid rgba(148,163,184,.2); }
+
+    /* ── News ── */
     .news-item {
-      padding: 12px 0;
-      border-bottom: 1px solid #1e293b;
+      padding: 12px 8px; border-bottom: 1px solid var(--border);
+      display: flex; gap: 12px; align-items: flex-start;
+      border-radius: 8px; transition: background .2s;
     }
     .news-item:last-child { border-bottom: none; }
-    .news-title {
-      font-size: 0.9rem;
-      color: #e2e8f0;
-      margin-bottom: 6px;
-      line-height: 1.4;
-    }
-    .news-title a {
-      color: #e2e8f0;
-      text-decoration: none;
-    }
-    .news-title a:hover { color: #60a5fa; text-decoration: underline; }
-    .news-meta {
-      font-size: 0.78rem;
-      color: #64748b;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+    .news-item:hover { background: rgba(139,92,246,.05); }
+    .news-idx { font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--text3); width: 20px; flex-shrink: 0; padding-top: 2px; }
+    .news-body { flex: 1; min-width: 0; }
+    .news-title { font-size: .875rem; font-weight: 500; line-height: 1.45; margin-bottom: 5px; }
+    .news-title a { color: var(--text); text-decoration: none; transition: color .2s; }
+    .news-title a:hover { color: var(--accent2); }
+    .news-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .news-time { font-size: .7rem; color: var(--text3); font-family: 'Space Mono', monospace; }
+    .news-desc { font-size: .72rem; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; }
 
-    /* ── Loading state ── */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #475569;
-      font-size: 0.9rem;
-    }
-
-    /* ── Footer ── */
     footer {
-      text-align: center;
-      padding: 16px;
-      color: #475569;
-      font-size: 0.8rem;
+      position: relative; z-index: 1;
+      text-align: center; padding: 16px;
+      color: var(--text3); font-size: .72rem;
+      border-top: 1px solid var(--border);
+      font-family: 'Space Mono', monospace; letter-spacing: .5px;
     }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent1); }
 
     @media (max-width: 900px) {
       main { grid-template-columns: 1fr; }
       .full-width { grid-column: 1; }
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .stats-row { grid-template-columns: repeat(2,1fr); }
     }
   </style>
 </head>
 <body>
 
+<!-- Header -->
 <header>
-  <div>
-    <h1>🌍 <span>NewsPulse</span></h1>
-    <div style="font-size:0.8rem;color:#93c5fd;margin-top:4px;">
-      Monitor Tren Berita Nasional — Big Data Kelompok 7
+  <div class="logo">
+    <div class="logo-icon">🌍</div>
+    <div class="logo-text">
+      <h1>News<span>Pulse</span></h1>
+      <p>Big Data Kelompok 7 · ETS 2026</p>
     </div>
   </div>
-  <div style="text-align:right">
-    <div><span id="status-dot"></span> Live</div>
-    <div id="last-update" style="margin-top:4px;">Memuat...</div>
+  <div class="header-right">
+    <div id="last-update">--:--:--</div>
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
   </div>
 </header>
 
+<!-- News Ticker -->
+<div class="ticker-wrap">
+  <div class="ticker-label">⚡ BREAKING</div>
+  <div class="ticker-track">
+    <div class="ticker-content" id="ticker-content">
+      <span class="ticker-item"><span class="ticker-item-src">NewsPulse</span><span class="ticker-sep"></span>Memuat berita terbaru...</span>
+    </div>
+  </div>
+</div>
+
 <main>
 
-  <!-- ── Stat Boxes ── -->
+  <!-- Stats -->
   <div class="full-width">
     <div class="stats-row">
       <div class="stat-box">
-        <div class="number" id="stat-api">-</div>
-        <div class="label">Artikel dari API</div>
+        <div class="stat-icon">📡</div>
+        <div class="stat-label">Artikel dari API</div>
+        <div class="stat-number" id="stat-api">—</div>
       </div>
       <div class="stat-box">
-        <div class="number" id="stat-rss">-</div>
-        <div class="label">Artikel dari RSS</div>
+        <div class="stat-icon">📰</div>
+        <div class="stat-label">Artikel dari RSS</div>
+        <div class="stat-number" id="stat-rss">—</div>
       </div>
       <div class="stat-box">
-        <div class="number" id="stat-words">-</div>
-        <div class="label">Kata Trending</div>
+        <div class="stat-icon">🔥</div>
+        <div class="stat-label">Kata Trending</div>
+        <div class="stat-number" id="stat-words">—</div>
       </div>
       <div class="stat-box">
-        <div class="number" id="stat-sources">-</div>
-        <div class="label">Sumber Media</div>
+        <div class="stat-icon">🗞️</div>
+        <div class="stat-label">Sumber Media</div>
+        <div class="stat-number" id="stat-sources">—</div>
       </div>
     </div>
   </div>
 
-  <!-- ── Panel 1: Kata Trending (Spark) ── -->
+  <!-- Kata Trending -->
   <div class="card">
-    <h2>📊 Kata Trending (Spark Analysis)</h2>
-    <div id="panel-words" class="loading">Memuat hasil Spark...</div>
+    <div class="card-header">
+      <div class="card-title"><div class="card-icon">📊</div>Kata Trending di Judul Berita</div>
+      <div class="card-meta">
+        <div class="spark-ts"><div class="spark-ts-dot"></div><span id="ts-words">Spark —</span></div>
+        <span class="card-tag">Spark SQL</span>
+      </div>
+    </div>
+    <div id="panel-words" class="loading">Memuat analisis Spark...</div>
   </div>
 
-  <!-- ── Panel 2: Distribusi per Sumber (Spark) ── -->
+  <!-- Distribusi Sumber -->
   <div class="card">
-    <h2>📰 Distribusi Berita per Sumber (Spark)</h2>
-    <div id="panel-sources" class="loading">Memuat hasil Spark...</div>
+    <div class="card-header">
+      <div class="card-title"><div class="card-icon">🥧</div>Distribusi Berita per Sumber</div>
+      <div class="card-meta">
+        <div class="spark-ts"><div class="spark-ts-dot"></div><span id="ts-sources">Spark —</span></div>
+        <span class="card-tag">groupBy</span>
+      </div>
+    </div>
+    <div id="panel-sources" class="loading">Memuat analisis Spark...</div>
   </div>
 
-  <!-- ── Panel 3: Volume per Jam (Spark) ── -->
+  <!-- Volume per Jam -->
   <div class="card full-width">
-    <h2>🕐 Volume Publikasi per Jam (Spark)</h2>
-    <div id="panel-hours" class="loading">Memuat hasil Spark...</div>
+    <div class="card-header">
+      <div class="card-title"><div class="card-icon">🕐</div>Volume Publikasi per Jam</div>
+      <div class="card-meta">
+        <div class="spark-ts"><div class="spark-ts-dot"></div><span id="ts-hours">Spark —</span></div>
+        <span class="card-tag">HOUR() · Spark SQL</span>
+      </div>
+    </div>
+    <div id="panel-hours" class="loading">Memuat analisis Spark...</div>
   </div>
 
-  <!-- ── Panel 4: Feed Berita Live Terbaru ── -->
+  <!-- Berita Live -->
   <div class="card full-width">
-    <h2>⚡ Berita Terbaru (Live dari Kafka)</h2>
+    <div class="card-header">
+      <div class="card-title"><div class="card-icon">⚡</div>Berita Terbaru — Live dari Kafka</div>
+      <span class="card-tag">Real-time</span>
+    </div>
     <div id="panel-news" class="loading">Memuat berita terbaru...</div>
   </div>
 
 </main>
 
-<footer>
-  NewsPulse — ETS Big Data Kelompok 7 · Auto-refresh setiap 30 detik
-</footer>
+<footer>NEWSPULSE · ETS BIG DATA KELOMPOK 7 · AUTO-REFRESH 30s</footer>
 
 <script>
-  function getBadgeClass(source) {
-    const s = (source || "").toLowerCase();
-    if (s.includes("kompas"))  return "badge-kompas";
+  const PIE_COLORS = [
+    "#8b5cf6","#a78bfa","#34d399","#fbbf24","#f87171",
+    "#60a5fa","#fb923c","#e879f9","#4ade80","#f472b6"
+  ];
+
+  function badgeClass(src) {
+    const s = (src||"").toLowerCase();
     if (s.includes("tempo"))   return "badge-tempo";
+    if (s.includes("kompas"))  return "badge-kompas";
     if (s.includes("gnews"))   return "badge-gnews";
     if (s.includes("newsapi")) return "badge-newsapi";
     return "badge-other";
   }
 
-  function formatTime(iso) {
-    if (!iso) return "-";
+  function fmtTime(iso) {
+    if (!iso) return "—";
     try {
-      const d = new Date(iso);
-      return d.toLocaleString("id-ID", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" });
+      return new Date(iso).toLocaleString("id-ID",{
+        day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit"
+      });
     } catch { return iso; }
   }
 
+  // ── Ticker ──
+  function buildTicker(news) {
+    if (!news?.length) return;
+    // Duplicate for seamless loop
+    const items = [...news, ...news].map(d => `
+      <span class="ticker-item" onclick="window.open('${d.url||'#'}','_blank')">
+        <span class="ticker-item-src">${d.source||'?'}</span>
+        <span class="ticker-sep"></span>
+        ${(d.title||'').slice(0,80)}
+      </span>`).join("");
+    document.getElementById("ticker-content").innerHTML = items;
+  }
+
+  // ── Spark timestamp ──
+  function setSparkTs(generatedAt) {
+    if (!generatedAt) return;
+    let label = "—";
+    try {
+      const d = new Date(generatedAt);
+      label = d.toLocaleString("id-ID",{
+        day:"2-digit", month:"short",
+        hour:"2-digit", minute:"2-digit"
+      });
+    } catch {}
+    ["ts-words","ts-sources","ts-hours"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = label;
+    });
+  }
+
+  // ── Words ──
   function renderWords(data) {
     const el = document.getElementById("panel-words");
-    if (!data || !data.length) {
-      el.innerHTML = '<div class="loading">Belum ada data — jalankan Spark analysis terlebih dahulu</div>';
-      return;
-    }
+    if (!data?.length) { el.innerHTML='<div class="loading">Belum ada data — jalankan Spark analysis</div>'; return; }
     const max = data[0].count || 1;
-    el.innerHTML = data.slice(0, 15).map((item, i) => `
-      <div class="bar-row">
-        <div class="bar-label">${i+1}. ${item.word}</div>
+    const tops = ["top1","top2","top3"];
+    el.innerHTML = data.slice(0,15).map((d,i) => `
+      <div class="bar-row ${tops[i]||''}">
+        <div class="bar-rank">${i+1}</div>
+        <div class="bar-label">${d.word}</div>
         <div class="bar-track">
-          <div class="bar-fill" style="width:${Math.max(10, item.count/max*100)}%">
-            ${item.count}
-          </div>
+          <div class="bar-fill" style="width:${Math.max(8,d.count/max*100)}%">${d.count}</div>
         </div>
-      </div>
-    `).join("");
+      </div>`).join("");
     document.getElementById("stat-words").textContent = data.length;
+  }
+
+  // ── Pie ──
+  function buildPie(data, size) {
+    const total = data.reduce((s,d)=>s+d.count,0)||1;
+    const cx=size/2, cy=size/2, r=size/2-8;
+    let angle = -Math.PI/2, paths = "";
+    data.forEach((d,i) => {
+      const slice = (d.count/total)*Math.PI*2;
+      const x1=cx+r*Math.cos(angle), y1=cy+r*Math.sin(angle);
+      const x2=cx+r*Math.cos(angle+slice), y2=cy+r*Math.sin(angle+slice);
+      const large = slice>Math.PI?1:0;
+      const color = PIE_COLORS[i%PIE_COLORS.length];
+      paths += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z"
+        fill="${color}" stroke="var(--bg2)" stroke-width="2" opacity="0.9">
+        <title>${d.source}: ${d.count} artikel (${((d.count/total)*100).toFixed(1)}%)</title></path>`;
+      angle += slice;
+    });
+    paths += `<circle cx="${cx}" cy="${cy}" r="${r*0.5}" fill="var(--bg2)"/>`;
+    paths += `<text x="${cx}" y="${cy-6}" text-anchor="middle" fill="var(--accent2)"
+      font-family="Space Mono,monospace" font-size="13" font-weight="700">${data.length}</text>
+    <text x="${cx}" y="${cy+10}" text-anchor="middle" fill="var(--text3)"
+      font-family="DM Sans,sans-serif" font-size="9">sumber</text>`;
+    return `<svg class="pie-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${paths}</svg>`;
   }
 
   function renderSources(data) {
     const el = document.getElementById("panel-sources");
-    if (!data || !data.length) {
-      el.innerHTML = '<div class="loading">Belum ada data — jalankan Spark analysis terlebih dahulu</div>';
-      return;
-    }
-    // ← FIX: hitung proporsi dari total semua artikel, bukan dari max
-    const total = data.reduce((sum, item) => sum + item.count, 0) || 1;
-    el.innerHTML = `
-      <table>
-        <tr><th>#</th><th>Sumber</th><th>Jumlah Artikel</th><th>Proporsi</th></tr>
-        ${data.map((item, i) => `
-          <tr>
-            <td class="rank">${i+1}</td>
-            <td><span class="badge ${getBadgeClass(item.source)}">${item.source}</span></td>
-            <td>${item.count}</td>
-            <td>
-              <div class="bar-track" style="height:16px;max-width:150px">
-                <div class="bar-fill" style="width:${Math.max(5, item.count/total*100)}%;font-size:0.7rem">
-                  ${((item.count/total)*100).toFixed(1)}%
-                </div>
-              </div>
-            </td>
-          </tr>
-        `).join("")}
-      </table>
-    `;
+    if (!data?.length) { el.innerHTML='<div class="loading">Belum ada data — jalankan Spark analysis</div>'; return; }
+    const total = data.reduce((s,d)=>s+d.count,0)||1;
+    const pieHTML = buildPie(data, 160);
+    const legendHTML = data.map((d,i)=>`
+      <div class="pie-legend-item">
+        <div class="pie-dot" style="background:${PIE_COLORS[i%PIE_COLORS.length]}"></div>
+        <div class="pie-legend-name">${d.source}</div>
+        <div class="pie-legend-pct">${d.count} · ${((d.count/total)*100).toFixed(1)}%</div>
+      </div>`).join("");
+    el.innerHTML = `<div class="pie-wrap">${pieHTML}<div class="pie-legend">${legendHTML}</div></div>`;
     document.getElementById("stat-sources").textContent = data.length;
   }
 
+  // ── Hours ──
   function renderHours(data) {
     const el = document.getElementById("panel-hours");
-    if (!data || !data.length) {
-      el.innerHTML = '<div class="loading">Belum ada data — jalankan Spark analysis terlebih dahulu</div>';
-      return;
-    }
-    const max = Math.max(...data.map(d => d.count));
-    // Urutkan per jam 0-23
-    const sorted = [...data].sort((a, b) => a.hour - b.hour);
+    if (!data?.length) { el.innerHTML='<div class="loading">Belum ada data — jalankan Spark analysis</div>'; return; }
+    const sorted = [...data].sort((a,b)=>a.hour-b.hour);
+    const max = Math.max(...sorted.map(d=>d.count));
+    const peak = sorted.reduce((a,b)=>a.count>b.count?a:b);
+    const BAR_MAX = 80;
+    const cols = sorted.map(d => {
+      const barH = Math.max(6, Math.round(d.count/max*BAR_MAX));
+      const isPeak = d.hour === peak.hour;
+      return `
+        <div class="hour-col" title="${String(d.hour).padStart(2,'0')}:00 — ${d.count} artikel">
+          <div class="hour-count" style="color:${isPeak?'var(--accent2)':'var(--text3)'};font-weight:${isPeak?'700':'400'}">${d.count}</div>
+          <div class="hour-bar ${isPeak?'peak':'normal'}" style="height:${barH}px"></div>
+          <div class="hour-label" style="color:${isPeak?'var(--accent3)':'var(--text3)'}">${String(d.hour).padStart(2,'0')}</div>
+        </div>`;
+    }).join("");
     el.innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:8px;margin-top:8px">
-        ${sorted.map(item => `
-          <div style="text-align:center">
-            <div style="background:#1e40af;border-radius:6px 6px 0 0;height:${Math.max(8, item.count/max*80)}px;margin-bottom:4px"></div>
-            <div style="font-size:0.8rem;color:#60a5fa">${String(item.hour).padStart(2,"0")}:00</div>
-            <div style="font-size:0.75rem;color:#94a3b8">${item.count}</div>
-          </div>
-        `).join("")}
-      </div>
-      <div style="font-size:0.8rem;color:#475569;margin-top:12px">
-        📌 Jam tersibuk: <strong style="color:#60a5fa">
-          ${sorted.reduce((a,b) => a.count > b.count ? a : b).hour}:00 WIB
-        </strong>
-      </div>
-    `;
+      <div class="hours-outer"><div class="hours-chart">${cols}</div></div>
+      <div class="hours-insight">
+        📌 Jam tersibuk: <strong>${String(peak.hour).padStart(2,'0')}:00 WIB</strong>
+        dengan <strong>${peak.count} artikel</strong> — media nasional paling aktif publish di jam ini
+      </div>`;
   }
 
+  // ── News ──
   function renderNews(data) {
     const el = document.getElementById("panel-news");
-    if (!data || !data.length) {
-      el.innerHTML = '<div class="loading">Belum ada berita — pastikan producer berjalan</div>';
-      return;
-    }
-    el.innerHTML = data.slice(0, 15).map(item => `
+    if (!data?.length) { el.innerHTML='<div class="loading">Belum ada berita — pastikan producer berjalan</div>'; return; }
+    el.innerHTML = data.slice(0,15).map((d,i)=>`
       <div class="news-item">
-        <div class="news-title">
-          <a href="${item.url || '#'}" target="_blank">${item.title || 'Tanpa judul'}</a>
+        <div class="news-idx">${String(i+1).padStart(2,'0')}</div>
+        <div class="news-body">
+          <div class="news-title">
+            <a href="${d.url||'#'}" target="_blank" rel="noopener">${d.title||'Tanpa judul'}</a>
+          </div>
+          <div class="news-meta">
+            <span class="badge ${badgeClass(d.source)}">${d.source||'?'}</span>
+            <span class="news-time">${fmtTime(d.published_at)}</span>
+            ${d.description?`<span class="news-desc">${d.description.slice(0,80)}...</span>`:''}
+          </div>
         </div>
-        <div class="news-meta">
-          <span class="badge ${getBadgeClass(item.source)}">${item.source || '?'}</span>
-          <span>${formatTime(item.published_at)}</span>
-          ${item.description ? `<span style="color:#475569">${item.description.slice(0,100)}...</span>` : ''}
-        </div>
-      </div>
-    `).join("");
+      </div>`).join("");
   }
 
+  // ── Main fetch ──
   async function fetchAndRender() {
     try {
       const res  = await fetch("/api/data");
       const data = await res.json();
 
-      // Update last update time
-      document.getElementById("last-update").textContent = "Update: " + data.last_update;
-
-      // Update stat boxes
+      document.getElementById("last-update").textContent = "Update " + data.last_update;
       document.getElementById("stat-api").textContent = data.total_api || 0;
       document.getElementById("stat-rss").textContent = data.total_rss || 0;
 
-      // Render panels dari Spark results
       const spark = data.spark || {};
       renderWords(spark.top_words || []);
       renderSources(spark.sources || []);
       renderHours(spark.hours || []);
-
-      // Render live news
       renderNews(data.live_all || []);
 
-    } catch (err) {
-      console.error("Fetch error:", err);
-      document.getElementById("last-update").textContent = "⚠️ Gagal memuat data";
+      // Ticker from live news
+      buildTicker(data.live_all || []);
+
+      // Spark timestamp
+      setSparkTs(spark.generated_at);
+
+    } catch(e) {
+      console.error(e);
+      document.getElementById("last-update").textContent = "⚠️ Error";
     }
   }
 
-  // Load pertama kali
   fetchAndRender();
-
-  // Auto-refresh setiap 30 detik
   setInterval(fetchAndRender, 30000);
 </script>
-
 </body>
 </html>
+  
