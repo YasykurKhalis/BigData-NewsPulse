@@ -11,14 +11,14 @@ from datetime import datetime
 from kafka import KafkaProducer
 
 # ── Konfigurasi ──────────────────────────────────────
-GNEWS_API_KEY  = "8799cfeaf912adae1279f4cea4595ee5"   # daftar di gnews.io
+GNEWS_API_KEY  = "8799cfeaf912adae1279f4cea4595ee5"  
 GNEWS_ENDPOINT = "https://gnews.io/api/v4/top-headlines"
 KAFKA_BROKER   = "localhost:9092"
 KAFKA_TOPIC    = "news-api"
 POLL_INTERVAL  = 600
 
 # NewsAPI.org sebagai alternatif kalau GNews habis quota
-NEWSAPI_KEY      = "GANTI_DENGAN_NEWSAPI_KEY"  # daftar di newsapi.org
+NEWSAPI_KEY      = "b7e45dd2468c4a8abc03be19da8dcb2a"
 NEWSAPI_ENDPOINT = "https://newsapi.org/v2/top-headlines"
 
 # ── Setup Kafka Producer ──────────────────────────────

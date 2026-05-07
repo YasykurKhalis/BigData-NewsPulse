@@ -13,7 +13,7 @@ from kafka import KafkaProducer
 # ── Konfigurasi ──────────────────────────────────────
 KAFKA_BROKER  = "localhost:9092"
 KAFKA_TOPIC   = "news-rss"
-POLL_INTERVAL = 300   # 5 menit = 300 detik
+POLL_INTERVAL = 300
 
 RSS_FEEDS = [
     {
