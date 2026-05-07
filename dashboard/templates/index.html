@@ -320,7 +320,8 @@
       el.innerHTML = '<div class="loading">Belum ada data — jalankan Spark analysis terlebih dahulu</div>';
       return;
     }
-    const max = data[0].count || 1;
+    // ← FIX: hitung proporsi dari total semua artikel, bukan dari max
+    const total = data.reduce((sum, item) => sum + item.count, 0) || 1;
     el.innerHTML = `
       <table>
         <tr><th>#</th><th>Sumber</th><th>Jumlah Artikel</th><th>Proporsi</th></tr>
@@ -331,8 +332,8 @@
             <td>${item.count}</td>
             <td>
               <div class="bar-track" style="height:16px;max-width:150px">
-                <div class="bar-fill" style="width:${Math.max(5, item.count/max*100)}%;font-size:0.7rem">
-                  ${((item.count/max)*100).toFixed(0)}%
+                <div class="bar-fill" style="width:${Math.max(5, item.count/total*100)}%;font-size:0.7rem">
+                  ${((item.count/total)*100).toFixed(1)}%
                 </div>
               </div>
             </td>
