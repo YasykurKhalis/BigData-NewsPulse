@@ -26,3 +26,10 @@ secrets.py
 
 # Log files
 *.log
+
+venv311/
+*.jar
+__pycache__/
+*.pyc
+dashboard/data/
+spark/*.json
